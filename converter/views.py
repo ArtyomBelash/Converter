@@ -12,24 +12,26 @@ def convert_docx_into_pdf(request):
         raise ValueError("CONVERT_API_SECRET is not set in settings.py")
     if request.method == 'POST':
         file_name = request.FILES.get('File')
-        file_path = os.path.join('media', file_name.name)
-        with open(file_path, 'wb+') as f:
-            for chunk in file_name.chunks():
-                f.write(chunk)
-        if file_name.name.endswith('.docx'):
-            input_file = os.path.join(settings.BASE_DIR, 'media', file_name.name)
-            output_dir = os.path.join(settings.BASE_DIR, 'media')
-            result = convertapi.convert('pdf', {
-                'File': input_file
-            }, from_format='docx').save_files(output_dir)
-            pdf_filename = file_name.name.replace('.docx', '.pdf')
-            download_link = reverse('serve_pdf', kwargs={'filename': pdf_filename})
-            context = {
-                'api': convertapi.api_secret,
-                'result': result,
-                'download_link': download_link, }
-            return HttpResponse(render(request, 'index.html', context))
-        return redirect('convert_docx_into_pdf')
+        if file_name:
+            file_path = os.path.join('media', file_name.name)
+            with open(file_path, 'wb+') as f:
+                for chunk in file_name.chunks():
+                    f.write(chunk)
+            if file_name.name.endswith('.docx'):
+                input_file = os.path.join(settings.BASE_DIR, 'media', file_name.name)
+                output_dir = os.path.join(settings.BASE_DIR, 'media')
+                result = convertapi.convert('pdf', {
+                    'File': input_file
+                }, from_format='docx').save_files(output_dir)
+                pdf_filename = file_name.name.replace('.docx', '.pdf')
+                download_link = reverse('serve_pdf', kwargs={'filename': pdf_filename})
+                context = {
+                    'api': convertapi.api_secret,
+                    'result': result,
+                    'download_link': download_link, }
+                return HttpResponse(render(request, 'index.html', context))
+            return redirect('convert_docx_into_pdf')
+        return render(request, 'index.html')
     return render(request, 'index.html')
 
 
