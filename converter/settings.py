@@ -22,7 +22,7 @@ INSTALLED_APPS = [
 ]
 
 INSTALLED_APPS += [
-    'app'
+    'app',
 ]
 
 MIDDLEWARE = [

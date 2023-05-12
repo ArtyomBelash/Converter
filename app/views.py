@@ -26,24 +26,26 @@ def convert_docx_into_pdf(request):
         raise ValueError("CONVERT_API_SECRET is not set in settings.py")
     if request.method == 'POST':
         file_name = request.FILES.get('File')
-        if file_name and file_name.name.endswith('.docx'):
-            file_path = os.path.join('media', file_name.name)
-            with open(file_path, 'wb+') as f:
-                for chunk in file_name.chunks():
-                    f.write(chunk)
-            input_file = os.path.join(settings.BASE_DIR, 'media', file_name.name)
-            output_dir = os.path.join(settings.BASE_DIR, 'media')
-            result = convertapi.convert('pdf', {
-                'File': input_file
-            }, from_format='docx').save_files(output_dir)
-            pdf_filename = file_name.name.replace('.docx', '.pdf')
-            download_link = reverse('serve_pdf', kwargs={'filename': pdf_filename})
-            context = {
-                'api': convertapi.api_secret,
-                'result': result,
-                'download_link': download_link, }
-            # schedule_file_deletion(file_path, delay_in_minutes=10)
-            return HttpResponse(render(request, 'app/index.html', context))
+        formats = ('docx', 'doc', 'dot', 'dotx', 'wpd', 'rtf', 'wri', 'log')
+        for format in formats:
+            if file_name and file_name.name.endswith(format):
+                file_path = os.path.join('media', file_name.name)
+                with open(file_path, 'wb+') as f:
+                    for chunk in file_name.chunks():
+                        f.write(chunk)
+                input_file = os.path.join(settings.BASE_DIR, 'media', file_name.name)
+                output_dir = os.path.join(settings.BASE_DIR, 'media')
+                result = convertapi.convert('pdf', {
+                    'File': input_file
+                }, from_format='docx').save_files(output_dir)
+                pdf_filename = file_name.name.replace(format, 'pdf')
+                download_link = reverse('serve_pdf', kwargs={'filename': pdf_filename})
+                context = {
+                    'api': convertapi.api_secret,
+                    'result': result,
+                    'download_link': download_link, }
+                # schedule_file_deletion(file_path, delay_in_minutes=10)
+                return HttpResponse(render(request, 'app/index.html', context))
         return redirect('convert_docx_into_pdf')
     return render(request, 'app/index.html')
 
