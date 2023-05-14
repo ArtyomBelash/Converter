@@ -47,6 +47,11 @@ def convert_docx_into_pdf(request):
                 # schedule_file_deletion(file_path, delay_in_minutes=10)
                 return HttpResponse(render(request, 'app/index.html', context))
         return redirect('convert_docx_into_pdf')
+    files_path = os.path.join(settings.BASE_DIR, 'media')
+    files = os.listdir(files_path)
+    for file in files:
+        file_path = os.path.join(files_path, file)
+        os.remove(file_path)
     return render(request, 'app/index.html')
 
 
