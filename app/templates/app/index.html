@@ -3,11 +3,11 @@
 <div class="container">
     <div class="row">
         <div class="col-md-6 offset-md-3 form-container">
-            <h1>Конвертатор DOCX в PDF</h1>
+            <h1>Конвертировать WORD в PDF</h1>
             <form method="post" action="{% url 'convert_docx_into_pdf' %}" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="form-group" align="center">
-                    <label for="File">Выберите файл для конвертации:</label>
+                    <label for="File">Выберите файл для конвертации:docx, doc, dot, dotx, wpd, rtf, wri, log</label>
                     <input type="file" class="form-control" id="File" name="File">
                 </div>
                 <div align="center">
