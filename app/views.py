@@ -1,23 +1,9 @@
-import sched
-import time
 from django.http import Http404, HttpResponse
 from django.urls import reverse
 from django.shortcuts import render, redirect
 import convertapi
 import os
 from converter import settings
-
-
-def delete_file(file_path):
-    os.remove(file_path)
-    print(f"File {file_path} has been deleted.")
-
-
-def schedule_file_deletion(file_path, delay_in_minutes):
-    s = sched.scheduler(time.time, time.sleep)
-    delay_in_seconds = delay_in_minutes * 60
-    s.enter(delay_in_seconds, 1, delete_file, argument=(file_path,))
-    s.run()
 
 
 def convert_docx_into_pdf(request):
@@ -27,8 +13,8 @@ def convert_docx_into_pdf(request):
     if request.method == 'POST':
         file_name = request.FILES.get('File')
         formats = ('docx', 'doc', 'dot', 'dotx', 'wpd', 'rtf', 'wri', 'log')
-        for format in formats:
-            if file_name and file_name.name.endswith(format):
+        for i in formats:
+            if file_name and file_name.name.endswith(i):
                 file_path = os.path.join('media', file_name.name)
                 with open(file_path, 'wb+') as f:
                     for chunk in file_name.chunks():
@@ -38,13 +24,12 @@ def convert_docx_into_pdf(request):
                 result = convertapi.convert('pdf', {
                     'File': input_file
                 }, from_format='docx').save_files(output_dir)
-                pdf_filename = file_name.name.replace(format, 'pdf')
+                pdf_filename = file_name.name.replace(i, 'pdf')
                 download_link = reverse('serve_pdf', kwargs={'filename': pdf_filename})
                 context = {
                     'api': convertapi.api_secret,
                     'result': result,
                     'download_link': download_link, }
-                # schedule_file_deletion(file_path, delay_in_minutes=10)
                 return HttpResponse(render(request, 'app/index.html', context))
         return redirect('convert_docx_into_pdf')
     files_path = os.path.join(settings.BASE_DIR, 'media')
